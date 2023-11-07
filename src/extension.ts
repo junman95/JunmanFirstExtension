@@ -28,11 +28,15 @@ export async function activate(context: vscode.ExtensionContext) {
   let disposable2 = vscode.commands.registerCommand(
     "JunmanFirstExtension.showImage",
     async () => {
-      const article = await vscode.window.showQuickPick(images, {
-        matchOnDetail: true,
-      });
-      // TODO: Deprecated 되었는데 어떻게 바꿔야할까
-      vscode.env.openExternal(article?.link);
+      await vscode.window
+        .showQuickPick(images, {
+          matchOnDetail: true,
+        })
+        .then((article) => {
+          // TODO: Deprecated 되었는데 어떻게 바꿔야할까
+          article &&
+            vscode.env.openExternal(article.link as unknown as vscode.Uri);
+        });
     }
   );
 
