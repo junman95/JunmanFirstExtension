@@ -1,26 +1,42 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import axios from "axios";
+import * as vscode from "vscode";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  const res = await axios.get("https://picsum.photos/v2/list");
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "JunmanFirstExtension" is now active!');
+  const images = res.data.map((item: any) => {
+    return {
+      label: item.author,
+      detail: item.url,
+      link: item.download_url,
+    };
+  });
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('JunmanFirstExtension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from !');
-	});
+  let disposable = vscode.commands.registerCommand(
+    "JunmanFirstExtension.whatIsMyName",
+    () => {
+      vscode.window
+        .showInputBox({
+          placeHolder: "Enter your name",
+        })
+        .then((value) => {
+          vscode.window.showInformationMessage(`Your name is ${value}`);
+        });
+    }
+  );
 
-	context.subscriptions.push(disposable);
+  let disposable2 = vscode.commands.registerCommand(
+    "JunmanFirstExtension.showImage",
+    async () => {
+      const article = await vscode.window.showQuickPick(images, {
+        matchOnDetail: true,
+      });
+      // TODO: Deprecated 되었는데 어떻게 바꿔야할까
+      vscode.env.openExternal(article?.link);
+    }
+  );
+
+  context.subscriptions.push(disposable, disposable2);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
